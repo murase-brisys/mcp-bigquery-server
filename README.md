@@ -32,7 +32,7 @@ Add the following to your `claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-bigquery",
+        "@ergut/mcp-bigquery-server",
         "your-project-id",
         "location"  // Optional, defaults to us-central1
       ]
@@ -61,7 +61,7 @@ npm run build
     "bigquery": {
       "command": "node",
       "args": [
-        "/path/to/your/clone/servers/src/bigquery/dist/index.js",
+        "/path/to/your/clone/mcp-bigquery-server/src/dist/index.js",
         "your-project-id",
         "location"  // Optional, defaults to us-central1
       ]

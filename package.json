@@ -1,9 +1,9 @@
 {
-  "name": "@modelcontextprotocol/server-bigquery",
+  "name": "@ergut/mcp-bigquery-server",
   "version": "0.1.0",
   "description": "MCP server for interacting with BigQuery databases",
   "license": "MIT",
-  "homepage": "https://modelcontextprotocol.io",
+  "homepage": "https://oredata.com",
   "type": "module",
   "bin": {
     "mcp-server-bigquery": "dist/index.js"
@@ -31,6 +31,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/modelcontextprotocol/server-bigquery.git"
+    "url": "https://github.com/ergut/mcp-bigquery-server"
   }
 }
