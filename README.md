@@ -86,3 +86,17 @@ The server uses Google Cloud authentication. Ensure you have:
 ## License
 
 This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
+
+## Support 💬
+
+- 🐛 [Report issues](https://github.com/ergut/mcp-bigquery-server/issues)
+- 💡 [Feature requests](https://github.com/ergut/mcp-bigquery-server/issues)
+- 📖 [Documentation](https://github.com/ergut/mcp-bigquery-server)
+
+## Author ✍️ 
+
+Salih Ergüt
+
+## Version 📋
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
