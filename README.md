@@ -3,76 +3,93 @@
   <img src="assets/mcp-bigquery-server-logo.png" alt="BigQuery MCP Server Logo" width="400"/>
 </div>
 
-[Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) is a standardized protocol that enables secure and efficient communication between large language models (LLMs) and external systems. This repository provides an MCP server that allows LLMs to safely interact with [BigQuery](https://cloud.google.com/bigquery/) datasets, enabling controlled data analysis while maintaining security.
+## What is this? 🤔
 
-## What Does This Server Do?
+This is a server that lets your LLMs (like Claude) talk directly to your BigQuery data! Think of it as a friendly translator that sits between your AI assistant and your database, making sure they can chat securely and efficiently.
 
-The server provides read-only access to BigQuery datasets through the MCP standard, allowing LLMs to:
-- Execute safe, read-only SQL queries
-- Inspect dataset schemas
-- Analyze data within defined safety limits
-
-### Tools
-
-- **query**
-  - Execute read-only SQL queries against BigQuery
-  - Input: `sql` (string): The SQL query to execute
-  - Safety limits: 1GB maximum bytes billed per query
-
-### Resources
-
-The server provides schema information for each table:
-
-- **Table Schemas** (`bigquery://<project-id>/<dataset>/<table>/schema`)
-  - JSON schema information for each table
-  - Includes column names and data types
-  - Automatically discovered from dataset metadata
-
-## Getting Started
-Before you begin, make sure you have:
-1. Node.js version 14 or higher installed
-2. A Google Cloud project with BigQuery enabled
-3. Google Cloud CLI installed
-4. Basic familiarity with BigQuery and SQL queries
-
-This server can be used in two ways:
-1. Via NPX for quick setup with Claude Desktop
-2. Local development for customization and development
-
-
-### Via NPX
-Add the following to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "bigquery": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@ergut/mcp-bigquery-server",
-        "your-project-id",
-        "location"  // Optional, defaults to us-central1
-      ]
-    }
-  }
-}
+### Quick Example
+```text
+You: "What were our top 10 customers last month?"
+Claude: *queries your BigQuery database and gives you the answer in plain English*
 ```
 
-### Local Development
-1. Clone the repository
-2. Install dependencies:
+No more writing SQL queries by hand - just chat naturally with your data!
+
+## How Does It Work? 🛠️
+
+This server uses the Model Context Protocol (MCP), which is like a universal translator for AI-database communication. While MCP is designed to work with any AI model, right now it's available as a developer preview in Claude Desktop.
+
+Here's all you need to do:
+1. Authenticate with Google Cloud (one-time setup)
+2. Add your project details to Claude Desktop's config file
+3. Start chatting with your BigQuery data naturally!
+
+### What Can It Do? 📊
+
+- Run SQL queries by just asking questions in plain English
+- Explore your dataset schemas
+- Analyze data within safe limits (1GB query limit by default)
+- Keep your data secure (read-only access)
+
+## Quick Start 🚀
+
+### Prerequisites
+- Node.js 14 or higher
+- Google Cloud project with BigQuery enabled
+- Google Cloud CLI installed
+- Claude Desktop (currently the only supported LLM interface)
+
+### Setup in 3 Easy Steps
+
+1. **Authenticate with Google Cloud**
+   ```bash
+   gcloud auth application-default login
+   ```
+
+2. **Add to your Claude Desktop config**
+   Add this to your `claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "bigquery": {
+         "command": "npx",
+         "args": [
+           "-y",
+           "@ergut/mcp-bigquery-server",
+           "your-project-id",
+           "location"  // Optional, defaults to us-central1
+         ]
+       }
+     }
+   }
+   ```
+
+3. **Start chatting!** 
+   Open Claude Desktop and start asking questions about your data.
+
+### Permissions Needed
+
+You'll need one of these:
+- `roles/bigquery.user` (recommended)
+- OR both:
+  - `roles/bigquery.dataViewer`
+  - `roles/bigquery.jobUser`
+
+## Developer Setup (Optional) 🔧
+
+Want to customize or contribute? Here's how to set it up locally:
+
 ```bash
+# Clone and install
+git clone https://github.com/ergut/mcp-bigquery-server
+cd mcp-bigquery-server
 npm install
-```
-Note: If any dependency fails during installation, you can remove it from the root `package.json` and proceed with the installation.
 
-3. Build the project:
-```bash
+# Build
 npm run build
 ```
 
-4. Configure Claude Desktop for local development. Add to your `claude_desktop_config.json`:
+Then update your Claude Desktop config to point to your local build:
 ```json
 {
   "mcpServers": {
@@ -88,33 +105,26 @@ npm run build
 }
 ```
 
-## Authentication
+## Current Limitations ⚠️
 
-The server uses Google Cloud authentication. Ensure you have:
-1. Installed Google Cloud CLI
-2. Run `gcloud auth application-default login`
-3. Required IAM Roles:
-   - Option 1: `roles/bigquery.user` (recommended)
-   - Option 2: Both of these roles:
-     - `roles/bigquery.dataViewer` - Grants read access to tables
-     - `roles/bigquery.jobUser` - Allows query execution
-   
-   Note: Contact your GCP administrator to get the necessary roles assigned to your account.
+- MCP support is currently only available in Claude Desktop (developer preview)
+- Connections are limited to local MCP servers running on the same machine
+- Queries are read-only with a 1GB processing limit
 
-## License
-
-This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
-
-## Support 💬
+## Support & Resources 💬
 
 - 🐛 [Report issues](https://github.com/ergut/mcp-bigquery-server/issues)
 - 💡 [Feature requests](https://github.com/ergut/mcp-bigquery-server/issues)
 - 📖 [Documentation](https://github.com/ergut/mcp-bigquery-server)
 
+## License 📝
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
 ## Author ✍️ 
 
 Salih Ergüt
 
-## Version 📋
+## Version History 📋
 
-See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
+See [CHANGELOG.md](CHANGELOG.md) for updates and version history.
