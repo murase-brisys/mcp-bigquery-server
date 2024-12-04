@@ -3,8 +3,8 @@ name: Publish Package to npm
 on:
   release:
     types: [created]
-  push:
-    branches: [ main ]  # Added for testing - you can remove this later
+#  push:
+#    branches: [ main ]  # Added for testing - you can remove this later
 
 jobs:
   build:

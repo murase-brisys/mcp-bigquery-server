@@ -1,8 +1,16 @@
-# BigQuery
+# BigQuery MCP Server
+<div align="center">
+  <img src="assets/mcp-bigquery-server-logo.png" alt="BigQuery MCP Server Logo" width="400"/>
+</div>
 
-A Model Context Protocol server that provides read-only access to BigQuery datasets. This server enables LLMs to inspect dataset schemas and execute read-only queries.
+[Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) is a standardized protocol that enables secure and efficient communication between large language models (LLMs) and external systems. This repository provides an MCP server that allows LLMs to safely interact with [BigQuery](https://cloud.google.com/bigquery/) datasets, enabling controlled data analysis while maintaining security.
 
-## Components
+## What Does This Server Do?
+
+The server provides read-only access to BigQuery datasets through the MCP standard, allowing LLMs to:
+- Execute safe, read-only SQL queries
+- Inspect dataset schemas
+- Analyze data within defined safety limits
 
 ### Tools
 
@@ -20,7 +28,17 @@ The server provides schema information for each table:
   - Includes column names and data types
   - Automatically discovered from dataset metadata
 
-## Usage with Claude Desktop
+## Getting Started
+Before you begin, make sure you have:
+1. Node.js version 14 or higher installed
+2. A Google Cloud project with BigQuery enabled
+3. Google Cloud CLI installed
+4. Basic familiarity with BigQuery and SQL queries
+
+This server can be used in two ways:
+1. Via NPX for quick setup with Claude Desktop
+2. Local development for customization and development
+
 
 ### Via NPX
 Add the following to your `claude_desktop_config.json`:
