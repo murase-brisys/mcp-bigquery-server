@@ -59,13 +59,17 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
     for (const dataset of datasets) {
       console.error(`Processing dataset: ${dataset.id}`);
       const [tables] = await dataset.getTables();
-      console.error(`Found ${tables.length} tables in dataset ${dataset.id}`);
+      console.error(`Found ${tables.length} tables and views in dataset ${dataset.id}`);
       
       for (const table of tables) {
+        // Get the metadata to check if it's a table or view
+        const [metadata] = await table.getMetadata();
+        const resourceType = metadata.type === 'VIEW' ? 'view' : 'table';
+        
         resources.push({
           uri: new URL(`${dataset.id}/${table.id}/${SCHEMA_PATH}`, resourceBaseUrl).href,
           mimeType: "application/json",
-          name: `"${dataset.id}.${table.id}" table schema`,
+          name: `"${dataset.id}.${table.id}" ${resourceType} schema`,
         });
       }
     }

@@ -27,7 +27,8 @@ Here's all you need to do:
 ### What Can It Do? 📊
 
 - Run SQL queries by just asking questions in plain English
-- Explore your dataset schemas
+- Access both tables and materialized views in your datasets
+- Explore dataset schemas with clear labeling of resource types (tables vs views)
 - Analyze data within safe limits (1GB query limit by default)
 - Keep your data secure (read-only access)
 
@@ -110,6 +111,7 @@ Then update your Claude Desktop config to point to your local build:
 - MCP support is currently only available in Claude Desktop (developer preview)
 - Connections are limited to local MCP servers running on the same machine
 - Queries are read-only with a 1GB processing limit
+- While both tables and views are supported, some complex view types might have limitations
 
 ## Support & Resources 💬
 
