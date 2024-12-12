@@ -97,13 +97,14 @@ Then update your Claude Desktop config to point to your local build:
     "bigquery": {
       "command": "node",
       "args": [
-        "/path/to/your/clone/mcp-bigquery-server/src/dist/index.js",
+        "/path/to/your/clone/mcp-bigquery-server/dist/index.js",
         "your-project-id",
-        "location"  // Optional, defaults to us-central1
+        "location"
       ]
     }
   }
 }
+Note that the location is optional and defaults to `us-central1`.
 ```
 
 ## Current Limitations ⚠️
