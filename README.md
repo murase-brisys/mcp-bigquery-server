@@ -57,8 +57,10 @@ Here's all you need to do:
          "args": [
            "-y",
            "@ergut/mcp-bigquery-server",
+           "--project-id",
            "your-project-id",
-           "location"  // Optional, defaults to us-central1
+           "--location",
+           "us-central1"  // Optional, defaults to us-central1
          ]
        }
      }
@@ -67,6 +69,17 @@ Here's all you need to do:
 
 3. **Start chatting!** 
    Open Claude Desktop and start asking questions about your data.
+
+### Command Line Arguments
+
+The server accepts the following arguments:
+- `--project-id`: (Required) Your Google Cloud project ID
+- `--location`: (Optional) BigQuery location, defaults to 'us-central1'
+
+Example usage:
+```bash
+npx @ergut/mcp-bigquery-server --project-id your-project-id --location europe-west1
+```
 
 ### Permissions Needed
 
@@ -98,13 +111,14 @@ Then update your Claude Desktop config to point to your local build:
       "command": "node",
       "args": [
         "/path/to/your/clone/mcp-bigquery-server/dist/index.js",
+        "--project-id",
         "your-project-id",
-        "location"
+        "--location",
+        "us-central1"
       ]
     }
   }
 }
-Note that the location is optional and defaults to `us-central1`.
 ```
 
 ## Current Limitations ⚠️

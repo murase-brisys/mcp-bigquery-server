@@ -10,6 +10,41 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { BigQuery } from '@google-cloud/bigquery';
 
+// Define configuration interface
+interface ServerConfig {
+  projectId: string;
+  location?: string;
+}
+
+// Parse command line arguments
+function parseArgs(): ServerConfig {
+  const args = process.argv.slice(2);
+  const config: ServerConfig = {
+    projectId: '',
+    location: 'us-central1' // Default location
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg.startsWith('--')) {
+      const key = arg.slice(2);
+      const value = args[++i];
+      if (key === 'project-id') {
+        config.projectId = value;
+      } else if (key === 'location') {
+        config.location = value;
+      }
+    }
+  }
+
+  if (!config.projectId) {
+    console.error("Usage: mcp-server-bigquery --project-id <project-id> [--location <location>]");
+    process.exit(1);
+  }
+
+  return config;
+}
+
 const server = new Server(
   {
     name: "mcp-server/bigquery",
@@ -23,17 +58,10 @@ const server = new Server(
   },
 );
 
-const args = process.argv.slice(2);
-if (args.length < 1) {
-  console.error("Usage: mcp-server-bigquery <project-id> [location]");
-  process.exit(1);
-}
-
-const projectId = args[0];
-const location = args[1] || 'us-central1';
-console.error(`Initializing BigQuery with project ID: ${projectId} and location: ${location}`);
-const bigquery = new BigQuery({ projectId });
-const resourceBaseUrl = new URL(`bigquery://${projectId}`);
+const config = parseArgs();
+console.error(`Initializing BigQuery with project ID: ${config.projectId} and location: ${config.location}`);
+const bigquery = new BigQuery({ projectId: config.projectId });
+const resourceBaseUrl = new URL(`bigquery://${config.projectId}`);
 
 const SCHEMA_PATH = "schema";
 
@@ -144,12 +172,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     try {
       // Qualify INFORMATION_SCHEMA queries
       if (sql.toUpperCase().includes('INFORMATION_SCHEMA')) {
-        sql = qualifyTablePath(sql, projectId);
+        sql = qualifyTablePath(sql, config.projectId);
       }
 
       const [rows] = await bigquery.query({
         query: sql,
-        location,
+        location: config.location,
         maximumBytesBilled: maximumBytesBilled.toString(),
       });
 
