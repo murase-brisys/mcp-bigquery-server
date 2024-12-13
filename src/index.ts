@@ -136,14 +136,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     let maximumBytesBilled = request.params.arguments?.maximumBytesBilled || "1000000000";
     
     // Validate read-only query
-    const upperSql = sql.toUpperCase();
-    if (upperSql.includes('INSERT') || 
-        upperSql.includes('UPDATE') || 
-        upperSql.includes('DELETE') || 
-        upperSql.includes('CREATE') || 
-        upperSql.includes('DROP')) {
+    const forbiddenPattern = /\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|MERGE|TRUNCATE|GRANT|REVOKE|EXECUTE|BEGIN|COMMIT|ROLLBACK)\b/i;
+    if (forbiddenPattern.test(sql)) {
       throw new Error('Only READ operations are allowed');
-    }
+    }    
 
     try {
       // Qualify INFORMATION_SCHEMA queries
