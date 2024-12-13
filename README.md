@@ -20,7 +20,7 @@ No more writing SQL queries by hand - just chat naturally with your data!
 This server uses the Model Context Protocol (MCP), which is like a universal translator for AI-database communication. While MCP is designed to work with any AI model, right now it's available as a developer preview in Claude Desktop.
 
 Here's all you need to do:
-1. Authenticate with Google Cloud (one-time setup)
+1. Set up authentication (see below)
 2. Add your project details to Claude Desktop's config file
 3. Start chatting with your BigQuery data naturally!
 
@@ -37,15 +37,21 @@ Here's all you need to do:
 ### Prerequisites
 - Node.js 14 or higher
 - Google Cloud project with BigQuery enabled
-- Google Cloud CLI installed
+- Either Google Cloud CLI installed or a service account key file
 - Claude Desktop (currently the only supported LLM interface)
 
 ### Setup in 3 Easy Steps
 
-1. **Authenticate with Google Cloud**
-   ```bash
-   gcloud auth application-default login
-   ```
+1. **Authenticate with Google Cloud** (choose one method):
+   - Using Google Cloud CLI (great for development):
+     ```bash
+     gcloud auth application-default login
+     ```
+   - Using a service account (recommended for production):
+     ```bash
+     # Save your service account key file and use --key-file parameter
+     # Remember to keep your service account key file secure and never commit it to version control
+     ```
 
 2. **Add to your Claude Desktop config**
    Add this to your `claude_desktop_config.json`:
@@ -60,7 +66,9 @@ Here's all you need to do:
            "--project-id",
            "your-project-id",
            "--location",
-           "us-central1"  // Optional, defaults to us-central1
+           "us-central1",
+           "--key-file",                        // Optional: for service account auth
+           "/path/to/service-account-key.json"  // Optional: path to your key file
          ]
        }
      }
@@ -75,10 +83,11 @@ Here's all you need to do:
 The server accepts the following arguments:
 - `--project-id`: (Required) Your Google Cloud project ID
 - `--location`: (Optional) BigQuery location, defaults to 'us-central1'
+- `--key-file`: (Optional) Path to service account key JSON file
 
-Example usage:
+Example using service account:
 ```bash
-npx @ergut/mcp-bigquery-server --project-id your-project-id --location europe-west1
+npx @ergut/mcp-bigquery-server --project-id your-project-id --location europe-west1 --key-file /path/to/key.json
 ```
 
 ### Permissions Needed
@@ -114,7 +123,9 @@ Then update your Claude Desktop config to point to your local build:
         "--project-id",
         "your-project-id",
         "--location",
-        "us-central1"
+        "us-central1",
+        "--key-file",                        // Optional: for service account auth
+        "/path/to/service-account-key.json"  // Optional: path to your key file
       ]
     }
   }
