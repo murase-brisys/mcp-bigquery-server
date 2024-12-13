@@ -1,4 +1,5 @@
 # BigQuery MCP Server
+[![smithery badge](https://smithery.ai/badge/@ergut/mcp-bigquery-server)](https://smithery.ai/protocol/@ergut/mcp-bigquery-server)
 <div align="center">
   <img src="assets/mcp-bigquery-server-logo.png" alt="BigQuery MCP Server Logo" width="400"/>
 </div>
@@ -33,6 +34,14 @@ Here's all you need to do:
 - Keep your data secure (read-only access)
 
 ## Quick Start 🚀
+
+### Installing via Smithery
+
+To install BigQuery MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/protocol/@ergut/mcp-bigquery-server):
+
+```bash
+npx @smithery/cli install @ergut/mcp-bigquery-server --client claude
+```
 
 ### Prerequisites
 - Node.js 14 or higher
