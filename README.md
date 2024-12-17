@@ -35,21 +35,27 @@ Here's all you need to do:
 
 ## Quick Start 🚀
 
-### Installing via Smithery
-
-To install BigQuery MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/protocol/@ergut/mcp-bigquery-server):
-
-```bash
-npx @smithery/cli install @ergut/mcp-bigquery-server --client claude
-```
-
 ### Prerequisites
 - Node.js 14 or higher
 - Google Cloud project with BigQuery enabled
 - Either Google Cloud CLI installed or a service account key file
 - Claude Desktop (currently the only supported LLM interface)
 
-### Setup in 3 Easy Steps
+### Option 1: Quick Install via Smithery (Recommended)
+To install BigQuery MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/protocol/@ergut/mcp-bigquery-server), run this command in your terminal:
+
+```bash
+npx @smithery/cli install @ergut/mcp-bigquery-server --client claude
+```
+The installer will prompt you for:
+
+- Your Google Cloud project ID
+- BigQuery location (defaults to us-central1)
+
+Once configured, Smithery will automatically update your Claude Desktop configuration and restart the application.
+
+### Option 2: Manual Setup
+If you prefer manual configuration or need more control:
 
 1. **Authenticate with Google Cloud** (choose one method):
    - Using Google Cloud CLI (great for development):
@@ -64,25 +70,47 @@ npx @smithery/cli install @ergut/mcp-bigquery-server --client claude
 
 2. **Add to your Claude Desktop config**
    Add this to your `claude_desktop_config.json`:
-   ```json
-   {
-     "mcpServers": {
-       "bigquery": {
-         "command": "npx",
-         "args": [
-           "-y",
-           "@ergut/mcp-bigquery-server",
-           "--project-id",
-           "your-project-id",
-           "--location",
-           "us-central1",
-           "--key-file",                        // Optional: for service account auth
-           "/path/to/service-account-key.json"  // Optional: path to your key file
-         ]
+
+   - Basic configuration:
+     ```json
+     {
+       "mcpServers": {
+         "bigquery": {
+           "command": "npx",
+           "args": [
+             "-y",
+             "@ergut/mcp-bigquery-server",
+             "--project-id",
+             "your-project-id",
+             "--location",
+             "us-central1"
+           ]
+         }
        }
      }
-   }
-   ```
+     ```
+
+   - With service account:
+     ```json
+     {
+       "mcpServers": {
+         "bigquery": {
+           "command": "npx",
+           "args": [
+             "-y",
+             "@ergut/mcp-bigquery-server",
+             "--project-id",
+             "your-project-id",
+             "--location",
+             "us-central1",
+             "--key-file",
+             "/path/to/service-account-key.json"
+           ]
+         }
+       }
+     }
+     ```
+     
 
 3. **Start chatting!** 
    Open Claude Desktop and start asking questions about your data.
@@ -133,8 +161,8 @@ Then update your Claude Desktop config to point to your local build:
         "your-project-id",
         "--location",
         "us-central1",
-        "--key-file",                        // Optional: for service account auth
-        "/path/to/service-account-key.json"  // Optional: path to your key file
+        "--key-file",
+        "/path/to/service-account-key.json"
       ]
     }
   }
