@@ -190,6 +190,16 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 Salih Ergüt
 
+## Sponsorship
+
+This project is proudly sponsored by:
+
+<div align="center">
+  <a href="https://www.oredata.com">
+    <img src="assets/oredata-logo-nobg.png" alt="OREDATA" width="300"/>
+  </a>
+</div>
+
 ## Version History 📋
 
 See [CHANGELOG.md](CHANGELOG.md) for updates and version history.
