@@ -156,20 +156,16 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 
     for (const dataset of datasets) {
       console.error(`Processing dataset: ${dataset.id}`);
+
       const [tables] = await dataset.getTables();
       console.error(`Found ${tables.length} tables and views in dataset ${dataset.id}`);
       
-      for (const table of tables) {
-        // Get the metadata to check if it's a table or view
-        const [metadata] = await table.getMetadata();
-        const resourceType = metadata.type === 'VIEW' ? 'view' : 'table';
-        
-        resources.push({
-          uri: new URL(`${dataset.id}/${table.id}/${SCHEMA_PATH}`, resourceBaseUrl).href,
-          mimeType: "application/json",
-          name: `"${dataset.id}.${table.id}" ${resourceType} schema`,
-        });
-      }
+      // データセットごとに1つのリソースを作成
+      resources.push({
+        uri: new URL(`${dataset.id}/${SCHEMA_PATH}`, resourceBaseUrl).href,
+        mimeType: "application/json",
+        name: `"${dataset.id}" dataset schema (${tables.length} tables/views)`,
+      });
     }
 
     console.error(`Total resources found: ${resources.length}`);
@@ -184,23 +180,34 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const resourceUrl = new URL(request.params.uri);
   const pathComponents = resourceUrl.pathname.split("/");
   const schema = pathComponents.pop();
-  const tableId = pathComponents.pop();
   const datasetId = pathComponents.pop();
 
   if (schema !== SCHEMA_PATH) {
     throw new Error("Invalid resource URI");
   }
 
+  // データセット内のすべてのテーブル情報を取得
   const dataset = bigquery.dataset(datasetId!);
-  const table = dataset.table(tableId!);
-  const [metadata] = await table.getMetadata();
+  const [tables] = await dataset.getTables();
+  
+  // 各テーブルの情報を収集
+  const tablesInfo = await Promise.all(
+    tables.map(async (table) => {
+      const [metadata] = await table.getMetadata();
+      return {
+        tableId: table.id,
+        type: metadata.type,
+        schema: metadata.schema.fields,
+      };
+    })
+  );
 
   return {
     contents: [
       {
         uri: request.params.uri,
         mimeType: "application/json",
-        text: JSON.stringify(metadata.schema.fields, null, 2),
+        text: JSON.stringify(tablesInfo, null, 2),
       },
     ],
   };
