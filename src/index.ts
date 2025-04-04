@@ -4,6 +4,8 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
+  GetPromptRequestSchema,
+  ListPromptsRequestSchema,
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
@@ -110,6 +112,7 @@ const server = new Server(
     capabilities: {
       resources: {},
       tools: {},
+      prompts: {}
     },
   },
 );
@@ -160,11 +163,17 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
       const [tables] = await dataset.getTables();
       console.error(`Found ${tables.length} tables and views in dataset ${dataset.id}`);
       
-      // データセットごとに1つのリソースを作成
+      // リソース名をより明確にする
       resources.push({
         uri: new URL(`${dataset.id}/${SCHEMA_PATH}`, resourceBaseUrl).href,
         mimeType: "application/json",
-        name: `"${dataset.id}" dataset schema (${tables.length} tables/views)`,
+        name: `Dataset: ${dataset.id} (${tables.length} tables/views)`,
+        // メタデータを追加して明示的にデータセット情報を含める
+        metadata: {
+          datasetId: dataset.id,
+          projectId: config.projectId,
+          resourceType: "dataset"
+        }
       });
     }
 
@@ -195,9 +204,14 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     tables.map(async (table) => {
       const [metadata] = await table.getMetadata();
       return {
+        // テーブル情報をより明確に
+        datasetId: datasetId,
         tableId: table.id,
+        fullTableId: `${config.projectId}.${datasetId}.${table.id}`, // 完全修飾名を追加
         type: metadata.type,
         schema: metadata.schema.fields,
+        // サンプルSQLクエリを追加
+        sampleQuery: `SELECT * FROM \`${config.projectId}.${datasetId}.${table.id}\` LIMIT 10`
       };
     })
   );
@@ -227,10 +241,26 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: "string",
               description: "Maximum bytes billed (default: 1GB)",
               optional: true
+            },
+            datasetId: {
+              type: "string",
+              description: "Dataset ID to use if not specified in query",
+              optional: true
             }
           },
         },
       },
+      // テーブル一覧を取得するツールを追加
+      {
+        name: "listTables",
+        description: "List all tables in a specific dataset",
+        inputSchema: {
+          type: "object",
+          properties: {
+            datasetId: { type: "string" }
+          },
+        },
+      }
     ],
   };
 });
@@ -239,6 +269,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (request.params.name === "query") {
     let sql = request.params.arguments?.sql as string;
     let maximumBytesBilled = request.params.arguments?.maximumBytesBilled || "1000000000";
+    const datasetId = request.params.arguments?.datasetId;
     
     // Validate read-only query
     const forbiddenPattern = /\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|MERGE|TRUNCATE|GRANT|REVOKE|EXECUTE|BEGIN|COMMIT|ROLLBACK)\b/i;
@@ -247,6 +278,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }    
 
     try {
+      // データセットIDが提供され、SQLにFROM句がある場合、修飾されていないテーブル名を完全修飾
+      if (datasetId) {
+        const tablePattern = /FROM\s+`?([^`.\s]+)`?(?!\.[^.\s])/gi;
+        sql = sql.replace(tablePattern, (match, tableName) => {
+          return `FROM \`${config.projectId}.${datasetId}.${tableName}\``;
+        });
+      }
+
       // Qualify INFORMATION_SCHEMA queries
       if (sql.toUpperCase().includes('INFORMATION_SCHEMA')) {
         sql = qualifyTablePath(sql, config.projectId);
@@ -260,6 +299,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       return {
         content: [{ type: "text", text: JSON.stringify(rows, null, 2) }],
+        isError: false,
+      };
+    } catch (error) {
+      throw error;
+    }
+  } else if (request.params.name === "listTables") {
+    const datasetId = request.params.arguments?.datasetId;
+    if (!datasetId) {
+      throw new Error("datasetId is required");
+    }
+
+    try {
+      const dataset = bigquery.dataset(datasetId as string);
+      const [tables] = await dataset.getTables();
+      
+      const tablesList = tables.map(table => ({
+        tableId: table.id,
+        fullTableId: `${config.projectId}.${datasetId}.${table.id}`
+      }));
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(tablesList, null, 2) }],
         isError: false,
       };
     } catch (error) {
@@ -295,5 +356,64 @@ async function runServer() {
     process.exit(1);
   }
 }
+
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  return {
+    prompts: [{
+      name: "gitlab-report",
+      description: "GitLabのマイルストーンに関するレポートを生成します。",
+      arguments: [{
+        name: "milestone",
+        description: "マイルストーン",
+        required: true
+      }]
+    }]
+  };
+});
+
+server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  if (request.params.name !== "gitlab-report") {
+    throw new Error("Unknown prompt");
+  }
+  return {
+    messages: [{
+      role: "user",
+      content: {
+        type: "text",
+        text: `
+# GitLabの開発状況の可視化
+
+## 目的
+BigQueryからGitLabのデータからマイルストーン"3.11.0"についてチームごとに振り返りのデータを作成します。
+上記をそれぞれグラフにまとめ、日本人の向けたレポートを作成します。
+グラフはプレゼンでプロが利用するようなモダンなデザインを目指します。
+最後にこのデータからプロジェクトマネージメントの観点から所感と、仮説を提案してください。
+
+## 抽出対象
+ - コミット数の合計
+   - merge_request_commitsの数を集計
+ - マージリクエストの合計数
+ - マージリクエストの合計数のstate別の合計数
+ - マージされたマージリクエストのリードタイムの平均
+ - 現在オープンされているMRを作成日が最も古い順から最大5個を抽出
+   - weburi必須
+
+## グラフ化
+ - コミット数の合計
+   - チーム別に棒グラフ
+ - マージリクエストの合計数
+   - チーム別に棒グラフ
+ - マージリクエストの合計数のstate別の合計数
+   - チーム別にstateで分類した積み上げ棒グラフ
+ - マージされたマージリクエストのリードタイムの平均
+   - チーム別に棒グラフ
+ - 現在オープンされているMRを作成日が最も古い順から最大5個を抽出
+   - table形式
+	 - weburiを記載
+				`
+      }
+    }]
+  };
+});
 
 runServer().catch(console.error);
